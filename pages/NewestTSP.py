@@ -50,7 +50,7 @@ if st.button("Submit Coordinates and Run GA") and len(city_coords) == num_cities
         for i in random_ids:
             population_perms.append(list(possible_perms[i]))
 
-    return population_perms
+        return population_perms
 
     def dist_two_cities(city_1, city_2):
         city_1_coords = city_coords[city_1]
