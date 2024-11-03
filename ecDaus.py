@@ -95,7 +95,7 @@ def replace(new_gen, population):
 #main
 
 def main(POP_SIZE, MUT_RATE, TARGET, GENES):
-    if st.number("Calculate:")
+    if st.number_input("Calculate:")
     # 1) initialize population
     initial_population = initialize_pop(TARGET)
     found = False
