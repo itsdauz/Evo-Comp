@@ -15,8 +15,11 @@ MUT_RATE = 0.2
 
 #TARGET: Our goal.
 #TARGET = 'Muhammad Firdaus'
-TARGET = st.text_input("Enter your name")
-TARGET = st.text_input("Enter Mutation Rate")
+TARGET = st.text_input("Enter your name", "Daus")
+
+#MUT_RATE: Our goal.
+#MUT_RATE = 0.01
+MUT_RATE = st.number_input("Enter Mutation Rate", 0.01)
 
 #GENES: Options from which our population would be created.
 GENES = ' abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
@@ -92,6 +95,7 @@ def replace(new_gen, population):
 #main
 
 def main(POP_SIZE, MUT_RATE, TARGET, GENES):
+    if st.number("Calculate:")
     # 1) initialize population
     initial_population = initialize_pop(TARGET)
     found = False
