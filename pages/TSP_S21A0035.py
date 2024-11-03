@@ -10,7 +10,7 @@ import streamlit as st
 
 x = [2,4,5,3,11,9,13,8,10,5.5]
 y = [5,1,7,2.5,-2,7.5,4,4,10,6]
-cities_names = ["Ampang", "Bidor", "Parit Buntar", "Jeli", "Kulim", "Kuala Berang", "Kota TInggi", "Melor", "Sungai Petani", "Rawang"]
+cities_names = ["Ampang", "Bidor", "ParitBuntar", "Jeli", "Kulim", "KualaBerang", "KotaTinggi", "Melor", "SungaiPetani", "Rawang"]
 city_coords = dict(zip(cities_names, zip(x, y)))
 n_population = 250
 crossover_per = 0.8
@@ -24,13 +24,13 @@ colors = sns.color_palette("pastel", len(cities_names))
 city_icons = {
     "Ampang": "♕",
     "Bidor": "♖",
-    "Parit Buntar": "♗",
+    "ParitBuntar": "♗",
     "Jeli": "♘",
     "Kulim": "♙",
-    "Kuala Berang": "♔",
-    "Kota Tinggi": "♚",
+    "KualaBerang": "♔",
+    "KotaTinggi": "♚",
     "Melor": "♛",
-    "Sungai Petani": "♜",
+    "SungaiPetani": "♜",
     "Rawang": "♝"
 }
 
