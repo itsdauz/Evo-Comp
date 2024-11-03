@@ -56,7 +56,7 @@ def dist_two_cities(city_1, city_2):
         city_2_coords = city_coords[city_2]
         return np.sqrt(np.sum((np.array(city_1_coords) - np.array(city_2_coords)) ** 2))
 
-    def total_dist_individual(individual):
+def total_dist_individual(individual):
         total_dist = 0
         for i in range(len(individual)):
             if i == len(individual) - 1:
@@ -65,30 +65,30 @@ def dist_two_cities(city_1, city_2):
                 total_dist += dist_two_cities(individual[i], individual[i + 1])
         return total_dist
 
-    def fitness_prob(population):
+def fitness_prob(population):
         total_dist_all_individuals = [total_dist_individual(ind) for ind in population]
         max_population_cost = max(total_dist_all_individuals)
         population_fitness = max_population_cost - np.array(total_dist_all_individuals)
         population_fitness_sum = population_fitness.sum()
         return population_fitness / population_fitness_sum
 
-    def roulette_wheel(population, fitness_probs):
+def roulette_wheel(population, fitness_probs):
         population_fitness_probs_cumsum = fitness_probs.cumsum()
         selected_individual_index = np.searchsorted(population_fitness_probs_cumsum, np.random.rand())
         return population[selected_individual_index]
 
-    def crossover(parent_1, parent_2):
+def crossover(parent_1, parent_2):
         cut = round(random.uniform(1, len(city_coords) - 1))
         offspring_1 = parent_1[:cut] + [city for city in parent_2 if city not in parent_1[:cut]]
         offspring_2 = parent_2[:cut] + [city for city in parent_1 if city not in parent_2[:cut]]
         return offspring_1, offspring_2
 
-    def mutation(offspring):
+def mutation(offspring):
         index_1, index_2 = random.sample(range(len(city_coords)), 2)
         offspring[index_1], offspring[index_2] = offspring[index_2], offspring[index_1]
         return offspring
 
-    def run_ga(cities_names, n_population, n_generations, crossover_per, mutation_per):
+def run_ga(cities_names, n_population, n_generations, crossover_per, mutation_per):
         population = initial_population(cities_names, n_population)
         for _ in range(n_generations):
             fitness_probs = fitness_prob(population)
