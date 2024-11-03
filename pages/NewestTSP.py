@@ -51,7 +51,7 @@ if st.button("Submit Coordinates and Run GA") and len(city_coords) == num_cities
             population_perms.append(list(possible_perms[i]))
 return population_perms
 
-    def dist_two_cities(city_1, city_2):
+def dist_two_cities(city_1, city_2):
         city_1_coords = city_coords[city_1]
         city_2_coords = city_coords[city_2]
         return np.sqrt(np.sum((np.array(city_1_coords) - np.array(city_2_coords)) ** 2))
