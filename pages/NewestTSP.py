@@ -34,15 +34,6 @@ if st.button("Submit Coordinates and Run GA") and len(city_coords) == num_cities
     # Pastel Palette for Cities
     colors = sns.color_palette("pastel", len(city_coords))
 
-    # Helper Functions
-    def initial_population(cities_list, n_population=250):
-        population_perms = []
-        possible_perms = list(permutations(cities_list))
-        random_ids = random.sample(range(0, len(possible_perms)), n_population)
-        for i in random_ids:
-            population_perms.append(list(possible_perms[i]))
-        return population_perms
-
     def initial_population(cities_list, n_population=250):
         population_perms = []
         possible_perms = list(permutations(cities_list))
@@ -57,7 +48,7 @@ if st.button("Submit Coordinates and Run GA") and len(city_coords) == num_cities
             random_ids = random.sample(range(len(possible_perms)), n_population)
             for i in random_ids:
                 population_perms.append(list(possible_perms[i]))
-    return population_perms
+        return population_perms
 
     def dist_two_cities(city_1, city_2):
         city_1_coords = city_coords[city_1]
