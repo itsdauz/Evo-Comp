@@ -36,12 +36,21 @@ if st.button("Submit Coordinates and Run GA") and len(city_coords) == num_cities
 
     # Helper Functions
     def initial_population(cities_list, n_population=250):
-        population_perms = []
-        possible_perms = list(permutations(cities_list))
-        random_ids = random.sample(range(0, len(possible_perms)), n_population)
+    population_perms = []
+    possible_perms = list(permutations(cities_list))
+
+    # Check if possible permutations are less than the population size
+    if len(possible_perms) < n_population:
+        # Sample with replacement if needed
+        for _ in range(n_population):
+            population_perms.append(list(random.choice(possible_perms)))
+    else:
+        # Sample without replacement if there are enough unique routes
+        random_ids = random.sample(range(len(possible_perms)), n_population)
         for i in random_ids:
             population_perms.append(list(possible_perms[i]))
-        return population_perms
+
+    return population_perms
 
     def dist_two_cities(city_1, city_2):
         city_1_coords = city_coords[city_1]
