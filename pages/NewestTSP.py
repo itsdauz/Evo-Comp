@@ -36,8 +36,8 @@ if st.button("Submit Coordinates and Run GA") and len(city_coords) == num_cities
 
     # Helper Functions
     def initial_population(cities_list, n_population=250):
-    population_perms = []
-    possible_perms = list(permutations(cities_list))
+        population_perms = []
+        possible_perms = list(permutations(cities_list))
 
     # Check if possible permutations are less than the population size
     if len(possible_perms) < n_population:
