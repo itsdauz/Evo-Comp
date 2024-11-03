@@ -108,27 +108,27 @@ def run_ga(cities_names, n_population, n_generations, crossover_per, mutation_pe
             population = [population[i] for i in sorted_indices[:n_population]]
         return population
 
-    # Run Genetic Algorithm
-    cities_names = list(city_coords.keys())
-    best_population = run_ga(cities_names, n_population, n_generations, crossover_per, mutation_per)
-    total_distances = [total_dist_individual(ind) for ind in best_population]
-    best_index = np.argmin(total_distances)
-    shortest_path = best_population[best_index]
-    min_distance = total_distances[best_index]
+# Run Genetic Algorithm
+cities_names = list(city_coords.keys())
+best_population = run_ga(cities_names, n_population, n_generations, crossover_per, mutation_per)
+total_distances = [total_dist_individual(ind) for ind in best_population]
+best_index = np.argmin(total_distances)
+shortest_path = best_population[best_index]
+min_distance = total_distances[best_index]
 
-    # Plotting the Best Route
-    fig, ax = plt.subplots()
-    x_coords, y_coords = zip(*[city_coords[city] for city in shortest_path])
-    x_coords += (x_coords[0],)  # To return to the start
-    y_coords += (y_coords[0],)
-    ax.plot(x_coords, y_coords, '--go', label='Best Route', linewidth=2.5)
+# Plotting the Best Route
+fig, ax = plt.subplots()
+x_coords, y_coords = zip(*[city_coords[city] for city in shortest_path])
+x_coords += (x_coords[0],)  # To return to the start
+y_coords += (y_coords[0],)
+ax.plot(x_coords, y_coords, '--go', label='Best Route', linewidth=2.5)
 
-    # Draw cities and annotate
-    for i, (city, (x, y)) in enumerate(city_coords.items()):
-        color = colors[i]
-        ax.scatter(x, y, c=[color], s=1200, zorder=2)
-        ax.annotate(f"{i + 1}- {city}", (x, y), fontsize=14, ha='center', va='center', zorder=3)
+# Draw cities and annotate
+for i, (city, (x, y)) in enumerate(city_coords.items()):
+    color = colors[i]
+    ax.scatter(x, y, c=[color], s=1200, zorder=2)
+    ax.annotate(f"{i + 1}- {city}", (x, y), fontsize=14, ha='center', va='center', zorder=3)
 
-    ax.set_title(f"TSP Best Route Using GA\nTotal Distance: {min_distance:.2f}\nGenerations: {n_generations} | Population: {n_population}")
-    fig.set_size_inches(12, 8)
-    st.pyplot(fig)
+ax.set_title(f"TSP Best Route Using GA\nTotal Distance: {min_distance:.2f}\nGenerations: {n_generations} | Population: {n_population}")
+fig.set_size_inches(12, 8)
+st.pyplot(fig)
