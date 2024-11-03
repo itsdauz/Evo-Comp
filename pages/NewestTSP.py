@@ -38,25 +38,33 @@ if st.button("Submit Coordinates and Run GA") and len(city_coords) == num_cities
     def initial_population(cities_list, n_population=250):
         population_perms = []
         possible_perms = list(permutations(cities_list))
-
-    # Check if possible permutations are less than the population size
-    if len(possible_perms) < n_population:
-        # Sample with replacement if needed
-        for _ in range(n_population):
-            population_perms.append(list(random.choice(possible_perms)))
-    else:
-        # Sample without replacement if there are enough unique routes
-        random_ids = random.sample(range(len(possible_perms)), n_population)
+        random_ids = random.sample(range(0, len(possible_perms)), n_population)
         for i in random_ids:
             population_perms.append(list(possible_perms[i]))
-return population_perms
+        return population_perms
 
-def dist_two_cities(city_1, city_2):
+    def initial_population(cities_list, n_population=250):
+        population_perms = []
+        possible_perms = list(permutations(cities_list))
+
+        # Check if possible permutations are less than the population size
+        if len(possible_perms) < n_population:
+            # Sample with replacement if needed
+            for _ in range(n_population):
+                population_perms.append(list(random.choice(possible_perms)))
+        else:
+            # Sample without replacement if there are enough unique routes
+            random_ids = random.sample(range(len(possible_perms)), n_population)
+            for i in random_ids:
+                population_perms.append(list(possible_perms[i]))
+    return population_perms
+
+    def dist_two_cities(city_1, city_2):
         city_1_coords = city_coords[city_1]
         city_2_coords = city_coords[city_2]
         return np.sqrt(np.sum((np.array(city_1_coords) - np.array(city_2_coords)) ** 2))
 
-def total_dist_individual(individual):
+    def total_dist_individual(individual):
         total_dist = 0
         for i in range(len(individual)):
             if i == len(individual) - 1:
@@ -65,30 +73,30 @@ def total_dist_individual(individual):
                 total_dist += dist_two_cities(individual[i], individual[i + 1])
         return total_dist
 
-def fitness_prob(population):
+    def fitness_prob(population):
         total_dist_all_individuals = [total_dist_individual(ind) for ind in population]
         max_population_cost = max(total_dist_all_individuals)
         population_fitness = max_population_cost - np.array(total_dist_all_individuals)
         population_fitness_sum = population_fitness.sum()
         return population_fitness / population_fitness_sum
 
-def roulette_wheel(population, fitness_probs):
+    def roulette_wheel(population, fitness_probs):
         population_fitness_probs_cumsum = fitness_probs.cumsum()
         selected_individual_index = np.searchsorted(population_fitness_probs_cumsum, np.random.rand())
         return population[selected_individual_index]
 
-def crossover(parent_1, parent_2):
+    def crossover(parent_1, parent_2):
         cut = round(random.uniform(1, len(city_coords) - 1))
         offspring_1 = parent_1[:cut] + [city for city in parent_2 if city not in parent_1[:cut]]
         offspring_2 = parent_2[:cut] + [city for city in parent_1 if city not in parent_2[:cut]]
         return offspring_1, offspring_2
 
-def mutation(offspring):
+    def mutation(offspring):
         index_1, index_2 = random.sample(range(len(city_coords)), 2)
         offspring[index_1], offspring[index_2] = offspring[index_2], offspring[index_1]
         return offspring
 
-def run_ga(cities_names, n_population, n_generations, crossover_per, mutation_per):
+    def run_ga(cities_names, n_population, n_generations, crossover_per, mutation_per):
         population = initial_population(cities_names, n_population)
         for _ in range(n_generations):
             fitness_probs = fitness_prob(population)
@@ -108,27 +116,27 @@ def run_ga(cities_names, n_population, n_generations, crossover_per, mutation_pe
             population = [population[i] for i in sorted_indices[:n_population]]
         return population
 
-# Run Genetic Algorithm
-cities_names = list(city_coords.keys())
-best_population = run_ga(cities_names, n_population, n_generations, crossover_per, mutation_per)
-total_distances = [total_dist_individual(ind) for ind in best_population]
-best_index = np.argmin(total_distances)
-shortest_path = best_population[best_index]
-min_distance = total_distances[best_index]
+    # Run Genetic Algorithm
+    cities_names = list(city_coords.keys())
+    best_population = run_ga(cities_names, n_population, n_generations, crossover_per, mutation_per)
+    total_distances = [total_dist_individual(ind) for ind in best_population]
+    best_index = np.argmin(total_distances)
+    shortest_path = best_population[best_index]
+    min_distance = total_distances[best_index]
 
-# Plotting the Best Route
-fig, ax = plt.subplots()
-x_coords, y_coords = zip(*[city_coords[city] for city in shortest_path])
-x_coords += (x_coords[0],)  # To return to the start
-y_coords += (y_coords[0],)
-ax.plot(x_coords, y_coords, '--go', label='Best Route', linewidth=2.5)
+    # Plotting the Best Route
+    fig, ax = plt.subplots()
+    x_coords, y_coords = zip(*[city_coords[city] for city in shortest_path])
+    x_coords += (x_coords[0],)  # To return to the start
+    y_coords += (y_coords[0],)
+    ax.plot(x_coords, y_coords, '--go', label='Best Route', linewidth=2.5)
 
-# Draw cities and annotate
-for i, (city, (x, y)) in enumerate(city_coords.items()):
-    color = colors[i]
-    ax.scatter(x, y, c=[color], s=1200, zorder=2)
-    ax.annotate(f"{i + 1}- {city}", (x, y), fontsize=14, ha='center', va='center', zorder=3)
+    # Draw cities and annotate
+    for i, (city, (x, y)) in enumerate(city_coords.items()):
+        color = colors[i]
+        ax.scatter(x, y, c=[color], s=1200, zorder=2)
+        ax.annotate(f"{i + 1}- {city}", (x, y), fontsize=14, ha='center', va='center', zorder=3)
 
-ax.set_title(f"TSP Best Route Using GA\nTotal Distance: {min_distance:.2f}\nGenerations: {n_generations} | Population: {n_population}")
-fig.set_size_inches(12, 8)
-st.pyplot(fig)
+    ax.set_title(f"TSP Best Route Using GA\nTotal Distance: {min_distance:.2f}\nGenerations: {n_generations} | Population: {n_population}")
+    fig.set_size_inches(12, 8)
+    st.pyplot(fig)
