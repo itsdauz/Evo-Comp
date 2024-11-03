@@ -1,9 +1,7 @@
 import matplotlib.pyplot as plt
 from itertools import permutations
-from random import shuffle
 import random
 import numpy as np
-import pandas as pd
 import seaborn as sns
 import streamlit as st
 
@@ -13,19 +11,25 @@ crossover_per = 0.8
 mutation_per = 0.2
 n_generations = 200
 
-# Streamlit Sidebar Inputs for Cities
-st.sidebar.title("City Coordinates Input")
-num_cities = st.sidebar.number_input("Number of Cities", min_value=2, max_value=20, value=10)
-
+# Set up city names and allow user to enter x, y coordinates for each city without instant updates
+num_cities = st.number_input("Number of Cities", min_value=2, max_value=20, value=10)
 city_coords = {}
-for i in range(num_cities):
-    city_name = st.sidebar.text_input(f"City {i + 1} Name", f"City_{i + 1}")
-    x_coord = st.sidebar.number_input(f"{city_name} X-Coordinate", value=round(random.uniform(0, 20), 2))
-    y_coord = st.sidebar.number_input(f"{city_name} Y-Coordinate", value=round(random.uniform(0, 20), 2))
-    city_coords[city_name] = (x_coord, y_coord)
 
-# Button to generate the graph after input
-if st.sidebar.button("Enter Coordinates and Run GA"):
+for i in range(num_cities):
+    city_name = st.text_input(f"Enter name for City {i + 1}", f"City_{i + 1}")
+    x_input = st.text_input(f"Enter X coordinate for {city_name}", key=f"x_{i}")
+    y_input = st.text_input(f"Enter Y coordinate for {city_name}", key=f"y_{i}")
+
+    if x_input and y_input:  # Only add the city if both x and y inputs are provided
+        try:
+            x_coord = float(x_input)
+            y_coord = float(y_input)
+            city_coords[city_name] = (x_coord, y_coord)
+        except ValueError:
+            st.error(f"Please enter valid numbers for coordinates of {city_name}.")
+
+# Button to confirm and display graph
+if st.button("Submit Coordinates and Run GA") and len(city_coords) == num_cities:
 
     # Pastel Palette for Cities
     colors = sns.color_palette("pastel", len(city_coords))
