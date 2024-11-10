@@ -96,11 +96,11 @@ def replace(new_gen, population):
 
 def main(POP_SIZE, MUT_RATE, TARGET, GENES):
     if st.button("Calculate:"):
-    # 1) initialize population
-    initial_population = initialize_pop(TARGET)
-    found = False
-    population = []
-    generation = 1
+        # 1) initialize population
+        initial_population = initialize_pop(TARGET)
+        found = False
+        population = []
+        generation = 1
 
     # 2) Calculating the fitness for the current population
     for _ in range(len(initial_population)):
