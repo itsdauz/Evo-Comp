@@ -5,6 +5,7 @@ from numpy.random import randn, rand, seed
 import streamlit as st
 
 st.title("Ackley Function Optimization with Evolution Strategies")
+st.title("Develop a (mu, lambda)-ES")
 
 # objective function
 def objective(x, y):
@@ -94,6 +95,8 @@ lam = 100
 best, score = es_comma(objective, bounds, n_iter, step_size, mu, lam)
 st.write('Done!')
 st.write('f(%s) = %f' % (best, score))
+
+st.title("Develop a (mu + lambda)-ES")
 
 # objective function
 def objective(v):
