@@ -84,7 +84,7 @@ results = objective([x, y])
 fig = pyplot.figure()
 axis = fig.add_subplot(111, projection='3d')
 axis.plot_surface(x, y, results, cmap='jet')
-st.pyplot(fig)
+st.pyplot(figure)
 
 # Perform the evolution strategies
 seed(1)
