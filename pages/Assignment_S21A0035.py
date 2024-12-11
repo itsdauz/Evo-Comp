@@ -27,13 +27,13 @@ program_ratings_dict = read_csv_to_dict(file_path)
 
 ######################################## INPUT PARAMETERS ########################################
 st.title("Genetic Algorithm for Optimal Program Scheduling")
-st.sidebar.header("Input Parameters")
+st.header("Input Parameters")
 
 # Allow users to input parameters interactively
-CO_R = st.sidebar.slider(
+CO_R = st.slider(
     "Crossover Rate (CO_R)", min_value=0.0, max_value=0.95, value=0.8, step=0.01
 )
-MUT_R = st.sidebar.slider(
+MUT_R = st.slider(
     "Mutation Rate (MUT_R)", min_value=0.01, max_value=0.05, value=0.2, step=0.01
 )
 
@@ -42,9 +42,9 @@ POP = 50
 EL_S = 2
 
 # Display selected parameters
-st.sidebar.write("### Selected Parameters")
-st.sidebar.write(f"- **Crossover Rate:** {CO_R}")
-st.sidebar.write(f"- **Mutation Rate:** {MUT_R}")
+st.write("### Selected Parameters")
+st.write(f"- **Crossover Rate:** {CO_R}")
+st.write(f"- **Mutation Rate:** {MUT_R}")
 
 ######################################## DEFINING FUNCTIONS ########################################
 ratings = program_ratings_dict
