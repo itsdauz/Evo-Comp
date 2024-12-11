@@ -69,10 +69,13 @@ def prioritize_high_rated_programs(time_slots):
             selected_program = prioritized_programs[0]
             prioritized_schedule.append(selected_program)
             remaining_programs.remove(selected_program)
-        else:
+        elif remaining_programs:
             random_program = random.choice(remaining_programs)
             prioritized_schedule.append(random_program)
             remaining_programs.remove(random_program)
+        else:
+            # No programs left, fill with a placeholder or skip
+            prioritized_schedule.append("No Program")
 
     return prioritized_schedule
 
