@@ -28,8 +28,6 @@ program_ratings_dict = read_csv_to_dict(file_path)
 ######################################## INPUT PARAMETERS ########################################
 st.title("Genetic Algorithm for Optimal Program Scheduling")
 st.header("Input Parameters")
-st.write("Ratings Dictionary:", ratings)
-st.write("Initial Schedule:", initial_prioritized_schedule)
 
 # Allow users to input parameters interactively
 CO_R = st.slider(
