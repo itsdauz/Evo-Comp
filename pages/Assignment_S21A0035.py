@@ -28,6 +28,8 @@ program_ratings_dict = read_csv_to_dict(file_path)
 ######################################## INPUT PARAMETERS ########################################
 st.title("Genetic Algorithm for Optimal Program Scheduling")
 st.header("Input Parameters")
+st.write("Ratings Dictionary:", ratings)
+st.write("Initial Schedule:", initial_prioritized_schedule)
 
 # Allow users to input parameters interactively
 CO_R = st.slider(
@@ -55,7 +57,11 @@ all_time_slots = list(range(6, 24))  # time slots
 def fitness_function(schedule):
     total_rating = 0
     for time_slot, program in enumerate(schedule):
-        total_rating += ratings[program][time_slot]
+        if program in ratings and time_slot < len(ratings[program]):
+            total_rating += ratings[program][time_slot]
+        else:
+            # Handle missing or out-of-range values gracefully
+            total_rating += 0
     return total_rating
 
 def prioritize_high_rated_programs(time_slots):
