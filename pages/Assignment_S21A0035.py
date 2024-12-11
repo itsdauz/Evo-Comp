@@ -58,30 +58,23 @@ def fitness_function(schedule):
         total_rating += ratings[program][time_slot]
     return total_rating
 
-# Initialize population
-def initialize_pop(programs, time_slots):
-    if not programs:
-        return [[]]
+def prioritize_high_rated_programs(time_slots):
+    prioritized_schedule = []
+    remaining_programs = all_programs.copy()
 
-    all_schedules = []
-    for i in range(len(programs)):
-        for schedule in initialize_pop(programs[:i] + programs[i + 1:], time_slots):
-            all_schedules.append([programs[i]] + schedule)
+    for time_slot in time_slots:
+        prioritized_programs = [program for program in remaining_programs if ratings[program][time_slot - 6] == 0.9]
 
-    return all_schedules
+        if prioritized_programs:
+            selected_program = prioritized_programs[0]
+            prioritized_schedule.append(selected_program)
+            remaining_programs.remove(selected_program)
+        else:
+            random_program = random.choice(remaining_programs)
+            prioritized_schedule.append(random_program)
+            remaining_programs.remove(random_program)
 
-# Selection
-def finding_best_schedule(all_schedules):
-    best_schedule = []
-    max_ratings = 0
-
-    for schedule in all_schedules:
-        total_ratings = fitness_function(schedule)
-        if total_ratings > max_ratings:
-            max_ratings = total_ratings
-            best_schedule = schedule
-
-    return best_schedule
+    return prioritized_schedule
 
 # Crossover
 def crossover(schedule1, schedule2):
@@ -132,15 +125,14 @@ def genetic_algorithm(initial_schedule, generations=GEN, population_size=POP, cr
     return population[0]
 
 ##################################### GENERATING RESULTS #####################################
-# Brute force approach
-all_possible_schedules = initialize_pop(all_programs, all_time_slots)
-initial_best_schedule = finding_best_schedule(all_possible_schedules)
+# Prioritize programs with high ratings (0.9)
+initial_prioritized_schedule = prioritize_high_rated_programs(all_time_slots)
 
 # Genetic algorithm
-rem_t_slots = len(all_time_slots) - len(initial_best_schedule)
-genetic_schedule = genetic_algorithm(initial_best_schedule, generations=GEN, population_size=POP, elitism_size=EL_S)
+rem_t_slots = len(all_time_slots) - len(initial_prioritized_schedule)
+genetic_schedule = genetic_algorithm(initial_prioritized_schedule, generations=GEN, population_size=POP, elitism_size=EL_S)
 
-final_schedule = initial_best_schedule + genetic_schedule[:rem_t_slots]
+final_schedule = initial_prioritized_schedule + genetic_schedule[:rem_t_slots]
 
 st.write("### Final Optimal Schedule")
 for time_slot, program in enumerate(final_schedule):
