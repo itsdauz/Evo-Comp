@@ -37,6 +37,10 @@ def filter_high_rating_programs(ratings_dict, threshold=0.9):
 program_ratings_dict = filter_high_rating_programs(program_ratings_dict)
 all_programs = list(program_ratings_dict.keys())
 
+# Helper function to get valid programs for a time slot
+def valid_programs_for_time_slot(time_slot):
+    return [program for program in all_programs if program_ratings_dict[program][time_slot] >= 0.9]
+
 # Streamlit UI
 st.title("Genetic Algorithm for Optimal Program Scheduling")
 st.header("Input Parameters")
@@ -90,8 +94,10 @@ def crossover(schedule1, schedule2):
 
 def mutate(schedule):
     mutation_point = random.randint(0, len(schedule) - 1)
-    new_program = random.choice(all_programs)
-    schedule[mutation_point] = new_program
+    valid_programs = valid_programs_for_time_slot(mutation_point)
+    if valid_programs:
+        new_program = random.choice(valid_programs)
+        schedule[mutation_point] = new_program
     return schedule
 
 def genetic_algorithm(initial_schedule, generations=GEN, population_size=POP, crossover_rate=CO_R, mutation_rate=MUT_R, elitism_size=EL_S):
@@ -127,10 +133,16 @@ def genetic_algorithm(initial_schedule, generations=GEN, population_size=POP, cr
 
     return population[0]
 
-all_possible_schedules = initialize_pop(all_programs, all_time_slots)
-initial_best_schedule = finding_best_schedule(all_possible_schedules)
-rem_t_slots = len(all_time_slots) - len(initial_best_schedule)
+# Generate initial schedules ensuring valid programs for each time slot
+initial_best_schedule = []
+for time_slot in all_time_slots:
+    valid_programs = valid_programs_for_time_slot(time_slot)
+    if valid_programs:
+        initial_best_schedule.append(random.choice(valid_programs))
+    else:
+        initial_best_schedule.append(random.choice(all_programs))
 
+rem_t_slots = len(all_time_slots) - len(initial_best_schedule)
 genetic_schedule = genetic_algorithm(initial_best_schedule, generations=GEN, population_size=POP, elitism_size=EL_S)
 final_schedule = initial_best_schedule + genetic_schedule[:rem_t_slots]
 
