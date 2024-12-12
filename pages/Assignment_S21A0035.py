@@ -1,97 +1,81 @@
-import csv
 import streamlit as st
+import csv
 import random
 
-################################# CSV READING FUNCTION ####################################
-# Function to read the CSV file and convert it to the desired format
 def read_csv_to_dict(file_path):
     program_ratings = {}
 
     with open(file_path, mode='r', newline='') as file:
         reader = csv.reader(file)
-        # Skip the header
         header = next(reader)
 
         for row in reader:
             program = row[0]
-            ratings = [float(x) for x in row[1:]]  # Convert the ratings to floats
+            ratings = [float(x) for x in row[1:]]
             program_ratings[program] = ratings
 
     return program_ratings
 
-# Path to the CSV file
-file_path = 'pages/program_ratings.csv'
+# File path to the uploaded CSV
+file_path = '/mnt/data/program_ratings.csv'
 
-# Get the data in the required format
+# Reading data
 program_ratings_dict = read_csv_to_dict(file_path)
+all_programs = list(program_ratings_dict.keys())
+all_time_slots = list(range(6, 24))  # Time slots from 6:00 to 23:00
 
-######################################## INPUT PARAMETERS ########################################
-st.title("Genetic Algorithm for Optimal Program Scheduling")
-st.header("Input Parameters")
+# Streamlit UI
+st.title("Optimal Program Scheduler")
+st.sidebar.header("Genetic Algorithm Parameters")
 
-# Allow users to input parameters interactively
-CO_R = st.slider(
-    "Crossover Rate (CO_R)", min_value=0.0, max_value=0.95, value=0.8, step=0.01
-)
-MUT_R = st.slider(
-    "Mutation Rate (MUT_R)", min_value=0.01, max_value=0.05, value=0.02, step=0.01
-)
-
-GEN = 100
-POP = 50
-EL_S = 2
-
-# Display selected parameters
-st.write("### Selected Parameters")
-st.write(f"- **Crossover Rate:** {CO_R}")
-st.write(f"- **Mutation Rate:** {MUT_R}")
-
-######################################## DEFINING FUNCTIONS ########################################
-ratings = program_ratings_dict
-
-all_programs = list(ratings.keys())  # all programs
-all_time_slots = list(range(6, 24))  # time slots
+# Sidebar inputs for genetic algorithm parameters
+CO_R = st.sidebar.slider("Crossover Rate", min_value=0.0, max_value=0.95, value=0.8, step=0.01)
+MUT_R = st.sidebar.slider("Mutation Rate", min_value=0.01, max_value=0.05, value=0.02, step=0.01)
+GEN = st.sidebar.number_input("Generations", min_value=10, max_value=500, value=100, step=10)
+POP = st.sidebar.number_input("Population Size", min_value=10, max_value=200, value=50, step=10)
+EL_S = st.sidebar.number_input("Elitism Size", min_value=1, max_value=10, value=2, step=1)
 
 def fitness_function(schedule):
     total_rating = 0
     for time_slot, program in enumerate(schedule):
-        total_rating += ratings[program][time_slot]
-    return total_rating
+        total_rating += program_ratings_dict[program][time_slot]
+    return round(total_rating, 2)
 
-def prioritize_high_rated_programs(time_slots):
-    prioritized_schedule = []
-    remaining_programs = [program for program in all_programs if any(r == 0.9 for r in ratings[program])]
+def initialize_pop(programs, time_slots):
+    if not programs:
+        return [[]]
 
-    for time_slot in time_slots:
-        prioritized_programs = [program for program in remaining_programs if ratings[program][time_slot - 6] == 0.9]
+    all_schedules = []
+    for i in range(len(programs)):
+        for schedule in initialize_pop(programs[:i] + programs[i + 1:], time_slots):
+            all_schedules.append([programs[i]] + schedule)
 
-        if prioritized_programs:
-            selected_program = prioritized_programs[0]  # Select the first program with 0.9 rating
-            prioritized_schedule.append(selected_program)
-        elif remaining_programs:
-            random_program = random.choice(remaining_programs)
-            prioritized_schedule.append(random_program)
-        else:
-            # Fill with a placeholder if no programs are left
-            prioritized_schedule.append("No Program")
+    return all_schedules
 
-    return prioritized_schedule
+def finding_best_schedule(all_schedules):
+    best_schedule = []
+    max_ratings = 0
 
-# Crossover
+    for schedule in all_schedules:
+        total_ratings = fitness_function(schedule)
+        if total_ratings > max_ratings:
+            max_ratings = total_ratings
+            best_schedule = schedule
+
+    return best_schedule
+
 def crossover(schedule1, schedule2):
     crossover_point = random.randint(1, len(schedule1) - 2)
     child1 = schedule1[:crossover_point] + schedule2[crossover_point:]
     child2 = schedule2[:crossover_point] + schedule1[crossover_point:]
     return child1, child2
 
-# Mutation
 def mutate(schedule):
     mutation_point = random.randint(0, len(schedule) - 1)
     new_program = random.choice(all_programs)
     schedule[mutation_point] = new_program
     return schedule
 
-# Genetic algorithm
 def genetic_algorithm(initial_schedule, generations=GEN, population_size=POP, crossover_rate=CO_R, mutation_rate=MUT_R, elitism_size=EL_S):
     population = [initial_schedule]
 
@@ -125,24 +109,22 @@ def genetic_algorithm(initial_schedule, generations=GEN, population_size=POP, cr
 
     return population[0]
 
-##################################### GENERATING RESULTS #####################################
-# Prioritize programs with high ratings (0.9)
-initial_prioritized_schedule = prioritize_high_rated_programs(all_time_slots)
+all_possible_schedules = initialize_pop(all_programs, all_time_slots)
+initial_best_schedule = finding_best_schedule(all_possible_schedules)
+rem_t_slots = len(all_time_slots) - len(initial_best_schedule)
 
-# Genetic algorithm
-genetic_schedule = genetic_algorithm(initial_prioritized_schedule, generations=GEN, population_size=POP, elitism_size=EL_S)
+genetic_schedule = genetic_algorithm(initial_best_schedule, generations=GEN, population_size=POP, elitism_size=EL_S)
+final_schedule = initial_best_schedule + genetic_schedule[:rem_t_slots]
 
-# Use the genetic algorithm result as the final schedule
-final_schedule = genetic_schedule
+# Displaying the final schedule
+st.subheader("Final Optimal Schedule")
 
-st.write("### Final Optimal Schedule")
-import pandas as pd
-
-schedule_data = {
-    "Time Slot": [f"{time_slot:02d}:00" for time_slot in all_time_slots],
-    "Program": final_schedule,
+data = {
+    "Time Slot": [f"{hour}:00" for hour in all_time_slots],
+    "Program": final_schedule
 }
-schedule_df = pd.DataFrame(schedule_data)
 
-st.write(schedule_df)
-st.write("### Total Ratings:", f"{fitness_function(final_schedule):.2f}")
+schedule_table = pd.DataFrame(data)
+st.table(schedule_table)
+
+st.write(f"**Total Ratings:** {fitness_function(final_schedule):.2f}")
