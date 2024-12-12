@@ -30,21 +30,33 @@ st.title("Genetic Algorithm for Optimal Program Scheduling")
 st.header("Input Parameters")
 
 # Allow users to input parameters interactively
-CO_R = st.slider(
-    "Crossover Rate (CO_R)", min_value=0.0, max_value=0.95, value=0.8, step=0.01
+st.write("### Trial 1 Parameters")
+CO_R1 = st.slider(
+    "Crossover Rate (CO_R) - Trial 1", min_value=0.0, max_value=0.95, value=0.8, step=0.01
 )
-MUT_R = st.slider(
-    "Mutation Rate (MUT_R)", min_value=0.01, max_value=0.05, value=0.2, step=0.01
+MUT_R1 = st.slider(
+    "Mutation Rate (MUT_R) - Trial 1", min_value=0.01, max_value=0.05, value=0.02, step=0.01
+)
+
+st.write("### Trial 2 Parameters")
+CO_R2 = st.slider(
+    "Crossover Rate (CO_R) - Trial 2", min_value=0.0, max_value=0.95, value=0.7, step=0.01
+)
+MUT_R2 = st.slider(
+    "Mutation Rate (MUT_R) - Trial 2", min_value=0.01, max_value=0.05, value=0.03, step=0.01
+)
+
+st.write("### Trial 3 Parameters")
+CO_R3 = st.slider(
+    "Crossover Rate (CO_R) - Trial 3", min_value=0.0, max_value=0.95, value=0.9, step=0.01
+)
+MUT_R3 = st.slider(
+    "Mutation Rate (MUT_R) - Trial 3", min_value=0.01, max_value=0.05, value=0.01, step=0.01
 )
 
 GEN = 100
 POP = 50
 EL_S = 2
-
-# Display selected parameters
-st.write("### Selected Parameters")
-st.write(f"- **Crossover Rate:** {CO_R}")
-st.write(f"- **Mutation Rate:** {MUT_R}")
 
 ######################################## DEFINING FUNCTIONS ########################################
 ratings = program_ratings_dict
@@ -60,19 +72,21 @@ def fitness_function(schedule):
 
 def prioritize_high_rated_programs(time_slots):
     prioritized_schedule = []
-    remaining_programs = [program for program in all_programs if any(r == 0.9 for r in ratings[program])]
+    remaining_programs = all_programs.copy()
 
     for time_slot in time_slots:
         prioritized_programs = [program for program in remaining_programs if ratings[program][time_slot - 6] == 0.9]
 
         if prioritized_programs:
-            selected_program = prioritized_programs[0]  # Select the first program with 0.9 rating
+            selected_program = prioritized_programs[0]
             prioritized_schedule.append(selected_program)
+            remaining_programs.remove(selected_program)
         elif remaining_programs:
             random_program = random.choice(remaining_programs)
             prioritized_schedule.append(random_program)
+            remaining_programs.remove(random_program)
         else:
-            # Fill with a placeholder if no programs are left
+            # No programs left, fill with a placeholder or skip
             prioritized_schedule.append("No Program")
 
     return prioritized_schedule
@@ -92,7 +106,7 @@ def mutate(schedule):
     return schedule
 
 # Genetic algorithm
-def genetic_algorithm(initial_schedule, generations=GEN, population_size=POP, crossover_rate=CO_R, mutation_rate=MUT_R, elitism_size=EL_S):
+def genetic_algorithm(initial_schedule, generations=GEN, population_size=POP, crossover_rate=0.8, mutation_rate=0.02, elitism_size=EL_S):
     population = [initial_schedule]
 
     for _ in range(population_size - 1):
@@ -129,20 +143,24 @@ def genetic_algorithm(initial_schedule, generations=GEN, population_size=POP, cr
 # Prioritize programs with high ratings (0.9)
 initial_prioritized_schedule = prioritize_high_rated_programs(all_time_slots)
 
-# Genetic algorithm
-rem_t_slots = len(all_time_slots) - len(initial_prioritized_schedule)
-genetic_schedule = genetic_algorithm(initial_prioritized_schedule, generations=GEN, population_size=POP, elitism_size=EL_S)
+# Genetic algorithm trials
+trial_parameters = [(CO_R1, MUT_R1), (CO_R2, MUT_R2), (CO_R3, MUT_R3)]
+trial_results = []
 
-final_schedule = initial_prioritized_schedule[:len(all_time_slots)]
+for i, (co_r, mut_r) in enumerate(trial_parameters):
+    genetic_schedule = genetic_algorithm(initial_prioritized_schedule, generations=GEN, population_size=POP, crossover_rate=co_r, mutation_rate=mut_r, elitism_size=EL_S)
+    final_schedule = initial_prioritized_schedule + genetic_schedule[:len(all_time_slots) - len(initial_prioritized_schedule)]
+    total_rating = fitness_function(final_schedule)
 
-st.write("### Final Optimal Schedule")
-import pandas as pd
+    trial_results.append((co_r, mut_r, final_schedule, total_rating))
 
-schedule_data = {
-    "Time Slot": [f"{time_slot:02d}:00" for time_slot in all_time_slots],
-    "Program": final_schedule,
-}
-schedule_df = pd.DataFrame(schedule_data)
+    # Display results
+    st.write(f"### Trial {i + 1} Results")
+    st.write(f"- **Crossover Rate:** {co_r}")
+    st.write(f"- **Mutation Rate:** {mut_r}")
 
-st.write(schedule_df)
-st.write("### Total Ratings:", fitness_function(final_schedule))
+    st.write("#### Resulting Schedule")
+    schedule_table = [[f"{all_time_slots[j]:02d}:00", program] for j, program in enumerate(final_schedule)]
+    st.table(schedule_table)
+
+    st.write(f"- **Total Ratings:** {total_rating}")
