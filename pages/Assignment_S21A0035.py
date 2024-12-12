@@ -17,7 +17,7 @@ def read_csv_to_dict(file_path):
     return program_ratings
 
 # File path to the uploaded CSV
-file_path = '/mnt/data/program_ratings.csv'
+file_path = 'pages/program_ratings.csv'
 
 # Reading data
 program_ratings_dict = read_csv_to_dict(file_path)
