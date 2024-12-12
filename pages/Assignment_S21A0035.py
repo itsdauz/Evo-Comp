@@ -1,6 +1,7 @@
 import csv
 import streamlit as st
 import random
+import pandas as pd
 
 ################################# CSV READING FUNCTION ####################################
 # Function to read the CSV file and convert it to the desired format
@@ -141,8 +142,17 @@ genetic_schedule = genetic_algorithm(initial_prioritized_schedule, generations=G
 
 final_schedule = initial_prioritized_schedule + genetic_schedule[:rem_t_slots]
 
-st.write("### Final Optimal Schedule")
-for time_slot, program in enumerate(final_schedule):
-    st.write(f"Time Slot {all_time_slots[time_slot]:02d}:00 - Program {program}")
+# Display the schedule in a table format
+st.write("### Final Optimal Schedule (Table Format)")
 
+# Create a DataFrame for the schedule
+schedule_df = pd.DataFrame({
+    "Time Slot": [f"{time_slot:02d}:00" for time_slot in all_time_slots],
+    "Program": final_schedule
+})
+
+# Display the DataFrame as a Streamlit table
+st.table(schedule_df)
+
+# Display Total Ratings
 st.write("### Total Ratings:", fitness_function(final_schedule))
