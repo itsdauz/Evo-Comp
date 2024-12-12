@@ -31,9 +31,9 @@ st.header("Input Parameters")
 # Main page inputs for genetic algorithm parameters
 CO_R = st.slider("Crossover Rate", min_value=0.0, max_value=0.95, value=0.8, step=0.01)
 MUT_R = st.slider("Mutation Rate", min_value=0.01, max_value=0.05, value=0.02, step=0.01)
-GEN = st.number_input("Generations", min_value=10, max_value=500, value=100, step=10)
-POP = st.number_input("Population Size", min_value=10, max_value=200, value=50, step=10)
-EL_S = st.number_input("Elitism Size", min_value=1, max_value=10, value=2, step=1)
+GEN = 100
+POP = 50
+EL_S = 2
 
 def fitness_function(schedule):
     total_rating = 0
