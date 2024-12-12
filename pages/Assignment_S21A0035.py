@@ -25,6 +25,18 @@ program_ratings_dict = read_csv_to_dict(file_path)
 all_programs = list(program_ratings_dict.keys())
 all_time_slots = list(range(6, 24))  # Time slots from 6:00 to 23:00
 
+# Filter programs to only include those with ratings >= 0.9
+def filter_high_rating_programs(ratings_dict, threshold=0.9):
+    filtered_programs = {}
+    for program, ratings in ratings_dict.items():
+        filtered_ratings = [rating if rating >= threshold else 0 for rating in ratings]
+        if any(filtered_ratings):
+            filtered_programs[program] = filtered_ratings
+    return filtered_programs
+
+program_ratings_dict = filter_high_rating_programs(program_ratings_dict)
+all_programs = list(program_ratings_dict.keys())
+
 # Streamlit UI
 st.title("Genetic Algorithm for Optimal Program Scheduling")
 st.header("Input Parameters")
@@ -35,6 +47,11 @@ MUT_R = st.slider("Mutation Rate", min_value=0.01, max_value=0.05, value=0.02, s
 GEN = 100
 POP = 50
 EL_S = 2
+
+# Display selected parameters
+st.write("### Selected Parameters")
+st.write(f"- **Crossover Rate:** {CO_R}")
+st.write(f"- **Mutation Rate:** {MUT_R}")
 
 def fitness_function(schedule):
     total_rating = 0
