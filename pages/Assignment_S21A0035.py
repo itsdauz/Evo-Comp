@@ -130,10 +130,10 @@ def genetic_algorithm(initial_schedule, generations=GEN, population_size=POP, cr
 initial_prioritized_schedule = prioritize_high_rated_programs(all_time_slots)
 
 # Genetic algorithm
-rem_t_slots = len(all_time_slots) - len(initial_prioritized_schedule)
 genetic_schedule = genetic_algorithm(initial_prioritized_schedule, generations=GEN, population_size=POP, elitism_size=EL_S)
 
-final_schedule = initial_prioritized_schedule[:len(all_time_slots)]
+# Use the genetic algorithm result as the final schedule
+final_schedule = genetic_schedule
 
 st.write("### Final Optimal Schedule")
 import pandas as pd
