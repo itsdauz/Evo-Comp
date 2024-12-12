@@ -1,6 +1,7 @@
 import streamlit as st
 import csv
 import random
+import pandas as pd
 
 def read_csv_to_dict(file_path):
     program_ratings = {}
