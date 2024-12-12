@@ -39,7 +39,13 @@ all_programs = list(program_ratings_dict.keys())
 
 # Helper function to get valid programs for a time slot
 def valid_programs_for_time_slot(time_slot):
-    return [program for program in all_programs if program_ratings_dict[program][time_slot] >= 0.9]
+    if time_slot >= len(all_time_slots):
+        return []  # Return an empty list if the time slot index is invalid
+    return [
+        program
+        for program in all_programs
+        if len(program_ratings_dict[program]) > time_slot and program_ratings_dict[program][time_slot] >= 0.9
+    ]
 
 # Streamlit UI
 st.title("Genetic Algorithm for Optimal Program Scheduling")
@@ -140,7 +146,9 @@ for time_slot in all_time_slots:
     if valid_programs:
         initial_best_schedule.append(random.choice(valid_programs))
     else:
-        initial_best_schedule.append(random.choice(all_programs))
+        # If no valid programs, select a fallback option
+        fallback_program = random.choice(all_programs)
+        initial_best_schedule.append(fallback_program)
 
 rem_t_slots = len(all_time_slots) - len(initial_best_schedule)
 genetic_schedule = genetic_algorithm(initial_best_schedule, generations=GEN, population_size=POP, elitism_size=EL_S)
