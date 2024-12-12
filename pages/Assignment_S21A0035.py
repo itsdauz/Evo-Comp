@@ -30,25 +30,11 @@ st.title("Genetic Algorithm for Optimal Program Scheduling")
 st.header("Input Parameters")
 
 # Allow users to input parameters interactively
-co_r_1 = st.slider(
-    "Crossover Rate for Trial 1 (CO_R)", min_value=0.0, max_value=0.95, value=0.8, step=0.01
+CO_R = st.slider(
+    "Crossover Rate (CO_R)", min_value=0.0, max_value=0.95, value=0.8, step=0.01
 )
-mut_r_1 = st.slider(
-    "Mutation Rate for Trial 1 (MUT_R)", min_value=0.01, max_value=0.05, value=0.02, step=0.01
-)
-
-co_r_2 = st.slider(
-    "Crossover Rate for Trial 2 (CO_R)", min_value=0.0, max_value=0.95, value=0.7, step=0.01
-)
-mut_r_2 = st.slider(
-    "Mutation Rate for Trial 2 (MUT_R)", min_value=0.01, max_value=0.05, value=0.03, step=0.01
-)
-
-co_r_3 = st.slider(
-    "Crossover Rate for Trial 3 (CO_R)", min_value=0.0, max_value=0.95, value=0.6, step=0.01
-)
-mut_r_3 = st.slider(
-    "Mutation Rate for Trial 3 (MUT_R)", min_value=0.01, max_value=0.05, value=0.04, step=0.01
+MUT_R = st.slider(
+    "Mutation Rate (MUT_R)", min_value=0.01, max_value=0.05, value=0.2, step=0.01
 )
 
 GEN = 100
@@ -56,10 +42,9 @@ POP = 50
 EL_S = 2
 
 # Display selected parameters
-st.write("### Selected Parameters for Each Trial")
-st.write(f"- **Trial 1:** Crossover Rate = {co_r_1}, Mutation Rate = {mut_r_1}")
-st.write(f"- **Trial 2:** Crossover Rate = {co_r_2}, Mutation Rate = {mut_r_2}")
-st.write(f"- **Trial 3:** Crossover Rate = {co_r_3}, Mutation Rate = {mut_r_3}")
+st.write("### Selected Parameters")
+st.write(f"- **Crossover Rate:** {CO_R}")
+st.write(f"- **Mutation Rate:** {MUT_R}")
 
 ######################################## DEFINING FUNCTIONS ########################################
 ratings = program_ratings_dict
@@ -70,31 +55,24 @@ all_time_slots = list(range(6, 24))  # time slots
 def fitness_function(schedule):
     total_rating = 0
     for time_slot, program in enumerate(schedule):
-        if program in ratings and (time_slot - 6) < len(ratings[program]):
-            total_rating += ratings[program][time_slot - 6]
-        else:
-            st.write(f"Warning: Program '{program}' or time slot {time_slot} is invalid.")
+        total_rating += ratings[program][time_slot]
     return total_rating
 
 def prioritize_high_rated_programs(time_slots):
     prioritized_schedule = []
-    remaining_programs = all_programs.copy()
+    remaining_programs = [program for program in all_programs if any(r == 0.9 for r in ratings[program])]
 
     for time_slot in time_slots:
-        prioritized_programs = [
-            program for program in remaining_programs 
-            if program in ratings and ratings[program][time_slot - 6] == 0.9
-        ]
+        prioritized_programs = [program for program in remaining_programs if ratings[program][time_slot - 6] == 0.9]
 
         if prioritized_programs:
-            selected_program = prioritized_programs[0]
+            selected_program = prioritized_programs[0]  # Select the first program with 0.9 rating
             prioritized_schedule.append(selected_program)
-            remaining_programs.remove(selected_program)
         elif remaining_programs:
             random_program = random.choice(remaining_programs)
             prioritized_schedule.append(random_program)
-            remaining_programs.remove(random_program)
         else:
+            # Fill with a placeholder if no programs are left
             prioritized_schedule.append("No Program")
 
     return prioritized_schedule
@@ -114,7 +92,7 @@ def mutate(schedule):
     return schedule
 
 # Genetic algorithm
-def genetic_algorithm(initial_schedule, generations=GEN, population_size=POP, crossover_rate=0.8, mutation_rate=0.02, elitism_size=EL_S):
+def genetic_algorithm(initial_schedule, generations=GEN, population_size=POP, crossover_rate=CO_R, mutation_rate=MUT_R, elitism_size=EL_S):
     population = [initial_schedule]
 
     for _ in range(population_size - 1):
@@ -151,30 +129,20 @@ def genetic_algorithm(initial_schedule, generations=GEN, population_size=POP, cr
 # Prioritize programs with high ratings (0.9)
 initial_prioritized_schedule = prioritize_high_rated_programs(all_time_slots)
 
-# Run the algorithm for each trial
-trials = [
-    {"co_r": co_r_1, "mut_r": mut_r_1},
-    {"co_r": co_r_2, "mut_r": mut_r_2},
-    {"co_r": co_r_3, "mut_r": mut_r_3},
-]
+# Genetic algorithm
+rem_t_slots = len(all_time_slots) - len(initial_prioritized_schedule)
+genetic_schedule = genetic_algorithm(initial_prioritized_schedule, generations=GEN, population_size=POP, elitism_size=EL_S)
 
-for i, trial in enumerate(trials, start=1):
-    co_r = trial["co_r"]
-    mut_r = trial["mut_r"]
+final_schedule = initial_prioritized_schedule[:len(all_time_slots)]
 
-    st.write(f"### Trial {i}")
-    st.write(f"**Crossover Rate:** {co_r}, **Mutation Rate:** {mut_r}")
+st.write("### Final Optimal Schedule")
+import pandas as pd
 
-    genetic_schedule = genetic_algorithm(initial_prioritized_schedule, generations=GEN, population_size=POP, crossover_rate=co_r, mutation_rate=mut_r, elitism_size=EL_S)
+schedule_data = {
+    "Time Slot": [f"{time_slot:02d}:00" for time_slot in all_time_slots],
+    "Program": final_schedule,
+}
+schedule_df = pd.DataFrame(schedule_data)
 
-    final_schedule = initial_prioritized_schedule + genetic_schedule[:len(all_time_slots) - len(initial_prioritized_schedule)]
-
-    # Display schedule in a table
-    st.write("**Resulting Schedule:**")
-    schedule_table = []
-    for time_slot, program in zip(all_time_slots, final_schedule):
-        schedule_table.append({"Time Slot": f"{time_slot}:00", "Program": program})
-
-    st.table(schedule_table)
-
-    st.write("**Total Ratings:**", fitness_function(final_schedule))
+st.write(schedule_df)
+st.write("### Total Ratings:", fitness_function(final_schedule))
