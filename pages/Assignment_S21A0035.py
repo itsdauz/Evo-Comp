@@ -145,4 +145,4 @@ schedule_data = {
 schedule_df = pd.DataFrame(schedule_data)
 
 st.write(schedule_df)
-st.write("### Total Ratings:", fitness_function(final_schedule))
+st.write("### Total Ratings:", f"{fitness_function(final_schedule):.2f}")
