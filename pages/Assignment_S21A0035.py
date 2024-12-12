@@ -1,7 +1,6 @@
 import csv
 import streamlit as st
 import random
-import pandas as pd
 
 ################################# CSV READING FUNCTION ####################################
 # Function to read the CSV file and convert it to the desired format
@@ -56,30 +55,24 @@ all_time_slots = list(range(6, 24))  # time slots
 def fitness_function(schedule):
     total_rating = 0
     for time_slot, program in enumerate(schedule):
-        if program in ratings and time_slot < len(ratings[program]):
-            total_rating += ratings[program][time_slot]
-        else:
-            # Handle missing or out-of-range values gracefully
-            total_rating += 0
+        total_rating += ratings[program][time_slot]
     return total_rating
 
 def prioritize_high_rated_programs(time_slots):
     prioritized_schedule = []
-    remaining_programs = all_programs.copy()
+    remaining_programs = [program for program in all_programs if any(r == 0.9 for r in ratings[program])]
 
     for time_slot in time_slots:
         prioritized_programs = [program for program in remaining_programs if ratings[program][time_slot - 6] == 0.9]
 
         if prioritized_programs:
-            selected_program = prioritized_programs[0]
+            selected_program = prioritized_programs[0]  # Select the first program with 0.9 rating
             prioritized_schedule.append(selected_program)
-            remaining_programs.remove(selected_program)
         elif remaining_programs:
             random_program = random.choice(remaining_programs)
             prioritized_schedule.append(random_program)
-            remaining_programs.remove(random_program)
         else:
-            # No programs left, fill with a placeholder or skip
+            # Fill with a placeholder if no programs are left
             prioritized_schedule.append("No Program")
 
     return prioritized_schedule
@@ -140,19 +133,16 @@ initial_prioritized_schedule = prioritize_high_rated_programs(all_time_slots)
 rem_t_slots = len(all_time_slots) - len(initial_prioritized_schedule)
 genetic_schedule = genetic_algorithm(initial_prioritized_schedule, generations=GEN, population_size=POP, elitism_size=EL_S)
 
-final_schedule = initial_prioritized_schedule + genetic_schedule[:rem_t_slots]
+final_schedule = initial_prioritized_schedule[:len(all_time_slots)]
 
-# Display the schedule in a table format
-st.write("### Final Optimal Schedule (Table Format)")
+st.write("### Final Optimal Schedule")
+import pandas as pd
 
-# Create a DataFrame for the schedule
-schedule_df = pd.DataFrame({
+schedule_data = {
     "Time Slot": [f"{time_slot:02d}:00" for time_slot in all_time_slots],
-    "Program": final_schedule
-})
+    "Program": final_schedule,
+}
+schedule_df = pd.DataFrame(schedule_data)
 
-# Display the DataFrame as a Streamlit table
-st.table(schedule_df)
-
-# Display Total Ratings
+st.write(schedule_df)
 st.write("### Total Ratings:", fitness_function(final_schedule))
